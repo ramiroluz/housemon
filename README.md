@@ -14,7 +14,7 @@ You will need python3, scikit-learn and Flask to run this project. In a debian s
 
 ```
 $ sudo apt install virtualenvwrapper
-$ echo "" >> ~/.bashrc
+$ echo -e "# Enable virtualenvwrapper\nsource /usr/share/virtualenvwrapper/virtualenvwrapper.sh" >> ~/.bashrc
 $ source ~/.bashrc   # with this you don't need to exit and enter bash/terminal again.
 $ mkdir -p ~/projects/python/
 $ cd ~/projects/python
