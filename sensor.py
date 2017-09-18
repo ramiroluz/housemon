@@ -1,9 +1,6 @@
 import re
 
 class Energy:
-    '''
-    expressions = ['(Device:.*;) Alarms', '^.*(Alarms:.*;) Power', '^.*(Line:.*;) Peaks', '^.*(Peaks:.*;) FFT Re', '^.*(FFT Re:.*;) FFT Img', '^.*(FFT Img:.*;) UTC Time', '^.*(UTC Time:.*;) hz', '^.*(hz:.*;) Wifi Strength', '^.*(WiFi Strength:.*;)']
-    '''
     def __init__(self):
         self.int_regex = re.compile('^[-]?[1-9]\d*$')
         self.float_regex = re.compile('^-?\d+\.\d+$')
@@ -31,8 +28,24 @@ class Energy:
             return float(value)
         return value
 
+    def clean_fields(self, value):
+        result = value
+        expr = re.compile(r'(Active=\d{3})(W)')
+        result = expr.sub(r'\1', result)
+        expr = re.compile(r'(Reactive=\d{3})(var)')
+        result = expr.sub(r'\1', result)
+        expr = re.compile(r'(Appearent=\d{3})(VA)')
+        result = expr.sub(r'\1', result)
+        expr = re.compile(r'(Current=\d\.\d{2})(A)')
+        result = expr.sub(r'\1', result)
+        expr = re.compile(r'(Voltage=\d{3}\.\d{2})(V)')
+        result = expr.sub(r'\1', result)
+        return result
+
     def parse_values(self, group):
         group_name, group_values = group[0].split(':', 1)
+        group_values = self.clean_fields(group_values)
+
         if self.check_value(self.datetime_regex, group_values):
             # make it follow the same pattern of single value items,
             # like hz, WiFi Strength, Dummy.
@@ -55,55 +68,24 @@ class Energy:
         match = regex.match(data)
         return match.groups()
 
+    def group_as_dict(self, regex, data):
+        group_txt = self.parse_group(regex, data)
+        group = self.parse_values(group_txt)
+        return group
+
     def parse(self, data):
         result = {}
-
-        group_txt = self.parse_group(self.device_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.alarms_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.power_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.line_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.peaks_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.peaks_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.fft_re_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.fft_img_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.utc_time_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.hz_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.wifi_strength_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
-
-        group_txt = self.parse_group(self.dummy_regex, data)
-        group = self.parse_values(group_txt)
-        result.update(group)
+        result.update(self.group_as_dict(self.device_regex, data))
+        result.update(self.group_as_dict(self.alarms_regex, data))
+        result.update(self.group_as_dict(self.power_regex, data))
+        result.update(self.group_as_dict(self.line_regex, data))
+        result.update(self.group_as_dict(self.peaks_regex, data))
+        result.update(self.group_as_dict(self.peaks_regex, data))
+        result.update(self.group_as_dict(self.fft_re_regex, data))
+        result.update(self.group_as_dict(self.fft_img_regex, data))
+        result.update(self.group_as_dict(self.utc_time_regex, data))
+        result.update(self.group_as_dict(self.hz_regex, data))
+        result.update(self.group_as_dict(self.wifi_strength_regex, data))
+        result.update(self.group_as_dict(self.dummy_regex, data))
 
         return result

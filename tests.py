@@ -5,6 +5,7 @@ from sensor import Energy
 
 class TestSensor(unittest.TestCase):
     def setUp(self):
+        self.maxDiff = None
         self.energy = Energy()
         self.data = (
             'Device: ID=10; Fw=16071801; Evt=2; Alarms: CoilRevesed=OFF; '
@@ -19,16 +20,32 @@ class TestSensor(unittest.TestCase):
             'WiFi Strength: -62; Dummy: 20'
         )
 
+    def test_clean_fields(self):
+        expected = (
+            'Device: ID=10; Fw=16071801; Evt=2; Alarms: CoilRevesed=OFF; '
+            'Power: Active=289; Reactive=279; Appearent=403; Line: '
+            'Current=1.75; Voltage=230.08; Phase=-43,841rad; Peaks: '
+            '1041.000; 1051.000; 1058.000; 1051.000; 1049.000; 1047.000; '
+            '1054.000; 1059.000; 1057.000; 1060.000; FFT Re: -257863.00; '
+            '102815.00; -64043.00; 48516.00; 59599.00; -4223.00; '
+            '-43441.00; 23559.00; -24518.00; FFT Img: 481910.00; '
+            '-14891.00; 69871.00; -7130.00; 43860.00; 34204.00; 55951.00; '
+            '-6945.00; 26131.00; UTC Time: 2016-10-4 16:47:50; hz: 49.87; '
+            'WiFi Strength: -62; Dummy: 20'
+        )
+
+        self.assertEqual(self.energy.clean_fields(self.data), expected)
+
     def test_values(self):
         expected = [
             ('Device', ('Device: ID=10; Fw=16071801; Evt=2;',), {'Device': {'ID': 10, 'Fw': 16071801, 'Evt': 2}}),
             ('Alarms', ('Alarms: CoilRevesed=OFF;',), {'Alarms': {'CoilRevesed': 'OFF'}}),
             ('Power', (
                 'Power: Active=289W; Reactive=279var; Appearent=403VA;',),
-             {'Power': {'Active': '289W', 'Reactive': '279var', 'Appearent': '403VA'}}),
+             {'Power': {'Active': 289, 'Reactive': 279, 'Appearent': 403}}),
             ('Line', (
                 'Line: Current=1.75A; Voltage=230.08V; Phase=-43,841rad;',),
-             {'Line': {'Current': '1.75A', 'Voltage': '230.08V', 'Phase': '-43,841rad'}}),
+             {'Line': {'Current': 1.75, 'Voltage': 230.08, 'Phase': '-43,841rad'}}),
             ('Peaks', (
                 'Peaks: 1041.000; 1051.000; 1058.000; 1051.000; 1049.000; '
                 '1047.000; 1054.000; 1059.000; 1057.000; 1060.000;',),
@@ -93,13 +110,13 @@ class TestSensor(unittest.TestCase):
                 'CoilRevesed': 'OFF'
             },
             'Power': {
-                'Active': '289W',
-                'Reactive': '279var',
-                'Appearent': '403VA'
+                'Active': 289,
+                'Reactive': 279,
+                'Appearent': 403
             },
             'Line': {
-                'Current': '1.75A',
-                'Voltage': '230.08V',
+                'Current': 1.75,
+                'Voltage': 230.08,
                 'Phase': '-43,841rad'
             },
             'Peaks': [

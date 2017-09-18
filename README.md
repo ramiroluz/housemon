@@ -20,6 +20,7 @@ $ mkdir -p ~/projects/python/
 $ cd ~/projects/python
 $ git clone git@github.com:ramiroluz/homemon.git
 $ cd homemon
+$ mkvirtualenv -p /usr/bin/python3 housemon
 $ setvirtualenvproject   # next time you run: workon homemon
 $                        # and you will be in this same directory.
 $ pip install -r requirements.txt
@@ -48,6 +49,12 @@ $ make run
 ```
 
 Then access the following url: http://localhost:8000
+
+## TODO
+
+* Create the database model.
+* Create web application.
+* Create the report.
 
 ## Deploying
 
