@@ -40,7 +40,7 @@ If you rather prefer py.test:
 $ make py.test
 ```
 
-## To see it in action
+## To see it in action (NOT IMPLEMENTED YET)
 
 To run it:
 
